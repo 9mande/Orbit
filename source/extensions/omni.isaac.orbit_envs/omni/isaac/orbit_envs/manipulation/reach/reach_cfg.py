@@ -48,14 +48,14 @@ class RandomizationCfg:
         """Randomization of end-effector pose command."""
 
         # category
-        position_cat: str = "default"  # randomize position: "default", "uniform"
+        position_cat: str = "uniform"  # randomize position: "default", "uniform"
         orientation_cat: str = "default"  # randomize position: "default", "uniform"
         # randomize position
         position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
         position_uniform_min = [0.25, -0.25, 0.25]  # position (x,y,z)
         position_uniform_max = [0.5, 0.25, 0.5]  # position (x,y,z)
         # randomize orientation
-        orientation_default = [1.0, 0.0, 0.0, 0.0]  # orientation default
+        orientation_default = [0.7079, 0.0, 0.0, 0.7079]  # orientation default
 
     # initialize
     ee_desired_pose: EndEffectorDesiredPoseCfg = EndEffectorDesiredPoseCfg()
@@ -72,11 +72,11 @@ class ObservationsCfg:
         # global group settings
         enable_corruption: bool = True
         # observation terms
-        arm_dof_pos_normalized = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
-        arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.1, "max": 0.1}}
-        ee_position = {}
-        ee_position_command = {}
-        actions = {}
+        arm_dof_pos_normalized = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}    # normalized value for robot position
+        arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.1, "max": 0.1}}                 # normalized value for robot speed
+        ee_position = {"scale":1.0,}                                                                                    # end effector position ? -> not using
+        ee_position_command = {"scale":1.0,}                                                                            # end effector target ? -> not using
+        actions = {}                                                                                        # final action ? -> not using
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -89,11 +89,12 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    tracking_robot_position_l2 = {"weight": 0.0}
-    tracking_robot_position_exp = {"weight": 2.5, "sigma": 0.05}  # 0.25
-    penalizing_robot_dof_velocity_l2 = {"weight": -0.02}  # -1e-4
-    penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}
-    penalizing_action_rate_l2 = {"weight": -0.1}
+    tracking_robot_position_l2 = {"weight": 30}                        # robot pos
+    # tracking_robot_position_exp = {"weight": 2.5}                       # robot pos exp
+    tracking_ee_orientation_l2 = {"weight": 3}                       # ee orientation exp
+    # penalizing_robot_dof_velocity_l2 = {"weight": -0.02}                # robot dof velocity penalty -> smooth move
+    # penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}            # robot dof acceleration penalty -> smooth move
+    # penalizing_action_rate_l2 = {"weight": -0.01}                        # action rate penalty -> efficient move
 
 
 @configclass

@@ -77,7 +77,12 @@ class ReachEnv(IsaacEnv):
         # setup debug visualization
         if self.cfg.viewer.debug_vis and self.enable_render:
             # create point instancer to visualize the goal points
-            self._goal_markers = PointMarker("/Visuals/ee_goal", self.num_envs, radius=0.025)
+            # self._goal_markers = PointMarker("/Visuals/ee_goal", self.num_envs, radius=0.025)
+            # create marker for viewing goal pose (2023/07/25)
+            self._goal_markers = StaticMarker(
+                "/Visuals/ee_goal", self.num_envs, usd_path=self.cfg.marker.usd_path, scale=self.cfg.marker.scale
+            )
+            
             # create marker for viewing end-effector pose
             self._ee_markers = StaticMarker(
                 "/Visuals/ee_current", self.num_envs, usd_path=self.cfg.marker.usd_path, scale=self.cfg.marker.scale
@@ -114,6 +119,8 @@ class ReachEnv(IsaacEnv):
         # controller reset
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
+        # elif self.cfg.control.control_type == "default":
+        #     self.robot_actions[env_ids, :] = 0
 
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
@@ -135,6 +142,7 @@ class ReachEnv(IsaacEnv):
             ]
         elif self.cfg.control.control_type == "default":
             self.robot_actions[:, : self.robot.arm_num_dof] = self.actions
+            # self.robot_actions[:, : self.robot.arm_num_dof] += self.actions # bong
         # perform physics stepping
         for _ in range(self.cfg.control.decimation):
             # set actions into buffers
@@ -234,7 +242,7 @@ class ReachEnv(IsaacEnv):
         # apply to instance manager
         # -- goal
         self._goal_markers.set_world_poses(self.ee_des_pose_w[:, :3], self.ee_des_pose_w[:, 3:7])
-        self._goal_markers.set_status(goal_indices)
+        # self._goal_markers.set_status(goal_indices)
         # -- end-effector
         self._ee_markers.set_world_poses(self.robot.data.ee_state_w[:, 0:3], self.robot.data.ee_state_w[:, 3:7])
         # -- task-space commands
@@ -319,13 +327,62 @@ class ReachRewardManager(RewardManager):
     def tracking_robot_position_l2(self, env: ReachEnv):
         """Penalize tracking position error using L2-kernel."""
         # compute error
-        return torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, 0:3]), dim=1)
+        error = torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1) 
+        # print("tracking_robot_position_l2 error : ", error)
+        return - error
 
-    def tracking_robot_position_exp(self, env: ReachEnv, sigma: float):
+    def tracking_ee_orientation_l2(self, env: ReachEnv):
+        """Penalize tracking position error using L2-kernel."""
+
+        # Compute difference between two quaternion by dot product
+        # Input: des_quat, cur_quat
+        # Output: Tensor ([batch_size])
+        # def quaternion_difference(des_quat, cur_quat):
+        #     # dot product
+        #     dot_product = torch.sum(des_quat * cur_quat, dim=1)
+        #     # if minus
+        #     mask = dot_product < 0.0
+        #     dot_product[mask] *= -1
+        #     # compute angle
+        #     angle = 2.0 * torch.acos(torch.clamp(dot_product, -1.0, 1.0))
+        #     return angle
+
+        # compute error by subtracting
+        def difference(des_quat, cur_quat):
+            w1, x1, y1, z1 = des_quat[:, 0], des_quat[:, 1], des_quat[:, 2], des_quat[:, 3]
+            w2, x2, y2, z2 = cur_quat[:, 0], cur_quat[:, 1], cur_quat[:, 2], cur_quat[:, 3]
+            mask1 = w1 < 0
+            x1[mask1] *= -1
+            y1[mask1] *= -1
+            z1[mask1] *= -1
+            w1[mask1] *= -1
+            mask2 = w2 < 0
+            x2[mask2] *= -1
+            y2[mask2] *= -1
+            z2[mask2] *= -1
+            w2[mask2] *= -1
+            des_quat_modified = torch.stack([w1, x1, y1, z1], dim=1)
+            cur_quat_modified = torch.stack([w2, x2, y2, z2], dim=1)
+
+            return torch.sum(torch.square(des_quat_modified - cur_quat_modified), dim=1)
+
+        # error = quaternion_difference(env.ee_des_pose_w[:, 3:7], env.robot.data.ee_state_w[:, 3:7])
+        error = difference(env.ee_des_pose_w[:, 3:7], env.robot.data.ee_state_w[:, 3:7])
+
+        return - error
+
+    def tracking_robot_position_exp(self, env: ReachEnv):
         """Penalize tracking position error using exp-kernel."""
         # compute error
-        error = torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, 0:3]), dim=1)
-        return torch.exp(-error / sigma)
+        error = torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1)
+        # print("tracking_robot_position_exp error : ", error)
+        return torch.exp(-error / 0.05)
+
+    # def tracking_ee_orientation_exp(self, env: ReachEnv):
+    #     """Penalize tracking end effector orientation error using exp-kernel"""
+    #     # compute error
+    #     error = torch.sum(torch.square(env.ee_des_pose_w[:, 3:7] - env.robot.data.ee_state_w[:, 3:7]), dim=1)
+    #     return torch.exp(-error / 0.05)
 
     def penalizing_robot_dof_velocity_l2(self, env: ReachEnv):
         """Penalize large movements of the robot arm."""
@@ -337,4 +394,6 @@ class ReachRewardManager(RewardManager):
 
     def penalizing_action_rate_l2(self, env: ReachEnv):
         """Penalize large variations in action commands."""
-        return torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
+        penalty = torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
+        print("action_rate_penalty ", penalty)
+        return penalty

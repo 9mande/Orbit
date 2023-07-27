@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "Isaac-Reach-Franka-v0","--headless", "--cpu", "--num_envs", "1024"] // to run train.py
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--cpu", "--num_envs", "4", "--headless"] // to run train.py
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "4", 
+            //         "--checkpoint", "./logs/sb3/Isaac-Reach-Franka-v0/Jul19_22-55-22/model.zip"] // to run play.py
+
+        }
+    ]
+}

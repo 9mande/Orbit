@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": ["--task", "Isaac-Reach-Franka-v0", "--headless", "--cpu", "--num_envs", "1024"] // to run train.py
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--cpu", "--num_envs", "1024"] // to run train.py
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "4", 
+            //         "--checkpoint /PATH/TO/model.zip"] // to run play.py
+        }
+    ]
+}

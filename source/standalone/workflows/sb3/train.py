@@ -109,7 +109,7 @@ def main():
         )
 
     # create agent from stable baselines
-    agent = PPO(policy_arch, env, verbose=1, **agent_cfg)
+    agent = PPO(policy_arch, env, verbose=1, **agent_cfg)                                   ### IMPORTANT ###
     # configure the logger
     new_logger = configure(log_dir, ["stdout", "tensorboard"])
     agent.set_logger(new_logger)
@@ -117,7 +117,7 @@ def main():
     # callbacks for agent
     checkpoint_callback = CheckpointCallback(save_freq=100, save_path=log_dir, name_prefix="model", verbose=2)
     # train the agent
-    agent.learn(total_timesteps=n_timesteps, callback=checkpoint_callback)
+    agent.learn(total_timesteps=n_timesteps, callback=checkpoint_callback)                  ### IMPORTANT ###
     # save the final model
     agent.save(os.path.join(log_dir, "model"))
 
