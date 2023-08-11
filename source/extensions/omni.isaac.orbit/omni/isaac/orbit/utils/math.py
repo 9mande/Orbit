@@ -519,10 +519,42 @@ def random_orientation(num: int, device: str) -> torch.Tensor:
     Returns:
         torch.Tensor: Sampled quaternion (w, x, y, z).
     """
-    # sample random orientation from normal distribution
-    quat = torch.randn((num, 4), dtype=torch.float, device=device)
-    # normalize the quaternion
-    return torch.nn.functional.normalize(quat, p=2.0, dim=-1, eps=1e-12)
+
+    # Initialize a tensor to store the sampled quaternions    
+    quat = torch.empty((num, 4), dtype=torch.float, device=device)
+
+    # poses = [[0.0, 1.0, 0.0, 0.0], [0.0, 0.7071, 0.0, 0.7071], [0.0, 0.7071, -0.7071, 0.0], [0.0, 0.7071, 0.7071, 0.0], [0.5, 0.5, 0.5, 0.5], [-0.5, 0.5, 0.5, 0.5]]
+    # quat_max = [1.0, 0.30618621784789724, 0.30618621784789724, 0.30618621784789724]
+    # quat_min = [0.88388347648318455, 0.0, -0.30618621784789724, -0.30618621784789724]
+    quat_max = [0.30618621784789724, 1.0, 0.30618621784789724, 0.30618621784789724]
+    quat_min = [0.0, 0.88388347648318455, -0.30618621784789724, -0.30618621784789724]
+
+    # # Sample random orientations until the condition is satisfied for all quaternions
+    for i in range(num):
+        # rand = torch.randint(0, 6, size=(1,)).item()
+        # quat[i] = torch.tensor(poses[rand], dtype=torch.float, device=device)
+        invalid = True
+        while invalid:
+            # Sample a random quaternion from the normal distribution
+            quat[i] = torch.randn((4,), dtype=torch.float, device=device)
+
+            # Normalize the quaternion
+            quat[i] = torch.nn.functional.normalize(quat[i], p=2.0, dim=-1, eps=1e-12)
+            
+            # Check the condition
+            for j in range(4):
+                if quat[i][j] > quat_max[j] or quat[i][j] < quat_min[j]:
+                    invalid = True
+                    break
+                else:
+                    invalid = False
+        # print(quat)
+
+
+    # quat = torch.randn((num, 4), dtype=torch.float, device=device)
+    # return torch.nn.functional.normalize(quat, p=2.0, dim=-1, eps=1e-12)
+
+    return quat
 
 
 @torch.jit.script

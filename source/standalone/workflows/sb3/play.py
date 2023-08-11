@@ -74,7 +74,7 @@ def main():
 
     # reset environment
     obs = env.reset()
-    # simulate environment
+    # simulate environment  
     while simulation_app.is_running():
         # agent stepping
         actions, _ = agent.predict(obs, deterministic=True) 

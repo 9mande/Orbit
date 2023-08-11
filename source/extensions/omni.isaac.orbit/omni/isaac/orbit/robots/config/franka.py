@@ -62,7 +62,7 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
             dof_names=["panda_joint[1-4]"],
             model_cfg=ImplicitActuatorCfg(velocity_limit=100.0, torque_limit=87.0),
             control_cfg=ActuatorControlCfg(
-                command_types=["p_abs"],
+                command_types=["p_rel"],
                 stiffness={".*": 800.0},
                 damping={".*": 40.0},
                 dof_pos_offset={
@@ -77,7 +77,7 @@ FRANKA_PANDA_ARM_WITH_PANDA_HAND_CFG = SingleArmManipulatorCfg(
             dof_names=["panda_joint[5-7]"],
             model_cfg=ImplicitActuatorCfg(velocity_limit=100.0, torque_limit=12.0),
             control_cfg=ActuatorControlCfg(
-                command_types=["p_abs"],
+                command_types=["p_rel"],
                 stiffness={".*": 800.0},
                 damping={".*": 40.0},
                 dof_pos_offset={"panda_joint5": 0.0, "panda_joint6": 3.037, "panda_joint7": 0.741},

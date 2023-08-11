@@ -14,11 +14,14 @@
             // to run train.py
             // "args": ["--task", "Isaac-Reach-Franka-v0", "--headless", "--cpu", "--num_envs", "1024"]
             // to run train.py with visual
-            // "args": ["--task", "Isaac-Reach-Franka-v0", "--cpu", "--num_envs", "1024"]
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--cpu", "--num_envs", "4"]
 
             // to run play.py
             "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "1", "--checkpoint", 
-                    "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Jul27_14-21-12/model_4915200_steps.zip"] 
+            "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Aug11_16-53-49/model_14643200_steps.zip"] 
+            // play for debug
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "1", "--headless", "--checkpoint", 
+            // "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Aug11_16-09-52/model_10444800_steps.zip"] 
         },
         {
             "name": "Python: Attach (windows-x86_64/linux-x86_64)",

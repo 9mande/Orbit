@@ -49,13 +49,13 @@ class RandomizationCfg:
 
         # category
         position_cat: str = "uniform"  # randomize position: "default", "uniform"
-        orientation_cat: str = "default"  # randomize position: "default", "uniform"
+        orientation_cat: str = "uniform"  # randomize position: "default", "uniform"
         # randomize position
-        position_default = [0.5, 0.0, 0.5]  # position default (x,y,z)
-        position_uniform_min = [0.25, -0.25, 0.25]  # position (x,y,z)
-        position_uniform_max = [0.5, 0.25, 0.5]  # position (x,y,z)
+        position_default = [0.5, 0.0, 0.25]  # position default (x,y,z)
+        position_uniform_min = [0.3, -0.25, 0.1]  # position (x,y,z)
+        position_uniform_max = [0.7, 0.25, 0.35]  # position (x,y,z)
         # randomize orientation
-        orientation_default = [0.7079, 0.0, 0.0, 0.7079]  # orientation default
+        orientation_default = [0.0, 1.0, 0.0, 0.0]  # orientation default
 
     # initialize
     ee_desired_pose: EndEffectorDesiredPoseCfg = EndEffectorDesiredPoseCfg()
@@ -71,12 +71,18 @@ class ObservationsCfg:
 
         # global group settings
         enable_corruption: bool = True
+
         # observation terms
-        arm_dof_pos_normalized = {"scale": 1.0, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}    # normalized value for robot position
-        arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.1, "max": 0.1}}                 # normalized value for robot speed
-        ee_position = {"scale":1.0,}                                                                                    # end effector position ? -> not using
-        ee_position_command = {"scale":1.0,}                                                                            # end effector target ? -> not using
-        actions = {}                                                                                        # final action ? -> not using
+        arm_dof_pos_normalized = {"scale": 1.0,}
+        # arm_dof_vel = {"scale": 0.5,}
+        # ee_position = {"scale":1.0,}
+        # ee_position_command ={"scale":1.0,}
+        # ee_orientation = {"scale":1.0,}       
+        # ee_orientation_command ={"scale":1.0,}
+        ee_position_difference = {"scale":1.0,}
+        ee_orientation_difference = {"scale":1.0,}
+        # actions = {}
+        ee_vel = {"scale":0.5,}
 
     # global observation settings
     return_dict_obs_in_group = False
@@ -89,12 +95,15 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    tracking_robot_position_l2 = {"weight": 30}                        # robot pos
-    # tracking_robot_position_exp = {"weight": 2.5}                       # robot pos exp
-    tracking_ee_orientation_l2 = {"weight": 3}                       # ee orientation exp
-    # penalizing_robot_dof_velocity_l2 = {"weight": -0.02}                # robot dof velocity penalty -> smooth move
-    # penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}            # robot dof acceleration penalty -> smooth move
-    # penalizing_action_rate_l2 = {"weight": -0.01}                        # action rate penalty -> efficient move
+    tracking_robot_position_l2 = {"weight": -30}
+    # tracking_robot_position_exp = {"weight": 2.5}
+    tracking_ee_orientation_l2 = {"weight": -3}
+    # penalizing_robot_dof_velocity_l2 = {"weight": -0.02}
+    # penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}
+    # penalizing_action_rate_l2 = {"weight": -1e-2}
+    # penalizing_action_variation_l2 = {"weight": -1e-2}
+    # penalizing_ee_velocity_l2 = {"weight": -0.02}
+    # reward_accurate_pose = {"weight": 30}
 
 
 @configclass
@@ -110,12 +119,12 @@ class ControlCfg:
 
     # action space
     control_type = "default"  # "default", "inverse_kinematics"
-    # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    # decimation: Number of control action updates at sim dt per policy dt
+    decimation = 1
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
-        command_type="pose_rel",
+        command_type="pose_abs",
         ik_method="dls",
         position_command_scale=(0.1, 0.1, 0.1),
         rotation_command_scale=(0.1, 0.1, 0.1),

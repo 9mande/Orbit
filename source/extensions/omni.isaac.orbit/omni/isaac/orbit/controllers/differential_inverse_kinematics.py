@@ -135,9 +135,9 @@ class DifferentialInverseKinematics:
         """Dimension of the action space of controller."""
         if "position" in self.cfg.command_type:
             return 3
-        elif self.cfg.command_type == "pose_rel":
+        elif self.cfg.command_type == "pose_rel": # relative?
             return 6
-        elif self.cfg.command_type == "pose_abs":
+        elif self.cfg.command_type == "pose_abs": # absolute?
             return 7
         else:
             raise ValueError(f"Invalid control command: {self.cfg.command_type}.")
