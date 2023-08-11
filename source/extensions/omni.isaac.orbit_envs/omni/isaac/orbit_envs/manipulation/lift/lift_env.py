@@ -478,7 +478,7 @@ class LiftRewardManager(RewardManager):
 
     def penalizing_tool_action_l2(self, env: LiftEnv):
         """Penalize large values in action commands for the tool."""
-        return -torch.square(env.actions[:, -1])
+        return - torch.square(env.actions[:, -1])
 
     def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""

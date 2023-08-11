@@ -374,13 +374,13 @@ class ReachRewardManager(RewardManager):
     def tracking_robot_position_l2(self, env: ReachEnv):
         """Penalize tracking position error using L2-kernel."""
         # compute error
-        error = torch.sqrt(torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1))
+        error = - torch.sqrt(torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1))
         # print("tracking_robot_position_l2 error : ", error)
         return error
 
     def tracking_ee_orientation_l2(self, env: ReachEnv):
         """Penalize tracking position error using L2-kernel."""
-        error = self.quaternion_difference(env.ee_des_pose_w[:, 3:7], env.robot.data.ee_state_w[:, 3:7])
+        error = - self.quaternion_difference(env.ee_des_pose_w[:, 3:7], env.robot.data.ee_state_w[:, 3:7])
         # error = difference(env.ee_des_pose_w[:, 3:7], env.robot.data.ee_state_w[:, 3:7])
         # print("ee orientation l2 error : ", error)
         return error
@@ -388,26 +388,26 @@ class ReachRewardManager(RewardManager):
     def tracking_robot_position_exp(self, env: ReachEnv):
         """Penalize tracking position error using exp-kernel."""
         # compute error
-        error = torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1)
+        error = - torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1)
         # print("tracking_robot_position_exp error : ", error)
-        return torch.exp(-error / 0.05)
+        return torch.exp(error / 0.05)
 
     def penalizing_robot_dof_velocity_l2(self, env: ReachEnv):
         """Penalize large movements of the robot arm."""
-        return torch.sum(torch.square(env.robot.data.arm_dof_vel), dim=1)
+        return - torch.sum(torch.square(env.robot.data.arm_dof_vel), dim=1)
     
     def penalizing_ee_velocity_l2(self, env: ReachEnv):
-        penalty = torch.sum(torch.square(env.robot.data.ee_state_w[:, 7:13]), dim=1)
+        penalty = - torch.sum(torch.square(env.robot.data.ee_state_w[:, 7:13]), dim=1)
         # print(penalty)
         return penalty
 
     def penalizing_robot_dof_acceleration_l2(self, env: ReachEnv):
         """Penalize fast movements of the robot arm."""
-        return torch.sum(torch.square(env.robot.data.dof_acc), dim=1)
+        return - torch.sum(torch.square(env.robot.data.dof_acc), dim=1)
 
     def penalizing_action_rate_l2(self, env: ReachEnv):
         """Penalize large variations in action commands."""
-        penalty = torch.sum(torch.square(env.actions), dim=1)
+        penalty = - torch.sum(torch.square(env.actions), dim=1)
         # penalty = torch.sum(torch.square(env.actions), dim=1)
         # print(torch.norm(env.actions - env.previous_actions, p=2, dim=1))
         # print("action_rate_penalty ", penalty)
@@ -415,7 +415,7 @@ class ReachRewardManager(RewardManager):
         return penalty
     
     def penalizing_action_variation_l2(self, env: ReachEnv):
-        return torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
+        return - torch.sum(torch.square(env.actions - env.previous_actions), dim=1)
 
     def reward_accurate_pose(self, env: ReachEnv):
         position_distance = torch.sqrt(torch.sum(torch.square(env.ee_des_pose_w[:, :3] - env.robot.data.ee_state_w[:, :3]), dim=1))

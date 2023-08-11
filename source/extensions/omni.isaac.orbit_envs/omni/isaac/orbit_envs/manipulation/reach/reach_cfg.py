@@ -95,14 +95,14 @@ class ObservationsCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    tracking_robot_position_l2 = {"weight": -30}
+    tracking_robot_position_l2 = {"weight": 30}
     # tracking_robot_position_exp = {"weight": 2.5}
-    tracking_ee_orientation_l2 = {"weight": -3}
-    # penalizing_robot_dof_velocity_l2 = {"weight": -0.02}
-    # penalizing_robot_dof_acceleration_l2 = {"weight": -1e-5}
-    # penalizing_action_rate_l2 = {"weight": -1e-2}
-    # penalizing_action_variation_l2 = {"weight": -1e-2}
-    # penalizing_ee_velocity_l2 = {"weight": -0.02}
+    tracking_ee_orientation_l2 = {"weight": 3}
+    # penalizing_robot_dof_velocity_l2 = {"weight": 0.02}
+    # penalizing_robot_dof_acceleration_l2 = {"weight": 1e-5}
+    # penalizing_action_rate_l2 = {"weight": 1e-2}
+    # penalizing_action_variation_l2 = {"weight": 1e-2}
+    # penalizing_ee_velocity_l2 = {"weight": 0.02}
     # reward_accurate_pose = {"weight": 30}
 
 

@@ -13,36 +13,57 @@
             "justMyCode": false,
             // to run train.py
             // "args": ["--task", "Isaac-Reach-Franka-v0", "--headless", "--cpu", "--num_envs", "1024"]
-            // to run train.py with visual
-            // "args": ["--task", "Isaac-Reach-Franka-v0", "--cpu", "--num_envs", "4"]
+            // lift
+            // "args": ["--task", "Isaac-Lift-Franka-v0", "--headless", "--cpu", "--num_envs", "1024"]
+            "args": ["--task", "Isaac-Lift-Franka-v0", "--cpu", "--num_envs", "1", "--checkpoint", 
+                        "/home/minjae/Orbit/logs/rsl_rl/lift/Aug11_17-35-07/model_200.pt"]
 
             // to run play.py
-            "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "1", "--checkpoint", 
-            "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Aug11_16-53-49/model_14643200_steps.zip"] 
+            // "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "1", "--checkpoint", 
+            // "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Aug11_16-53-49/model_14643200_steps.zip"] 
             // play for debug
             // "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "1", "--headless", "--checkpoint", 
             // "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Aug11_16-09-52/model_10444800_steps.zip"] 
         },
         {
-            "name": "Python: Attach (windows-x86_64/linux-x86_64)",
-            "type": "python",
-            "request": "attach",
-            "port": 3000,
-            "host": "localhost"
-        },
-        {
-            "name": "Python: Run Environment",
+            "name": "Reach: train",
             "type": "python",
             "request": "launch",
-            "args" : ["--task", "Isaac-Reach-Franka-v0"],
-            "program": "${file}",
+            "args": ["--task", "Isaac-Reach-Franka-v0", "--headless", "--cpu", "--num_envs", "1024"],
+            "program": "/home/minjae/Orbit/source/standalone/workflows/sb3/train.py",
             "console": "integratedTerminal",
-            "env": {
-                "EXP_PATH": "${workspaceFolder}/_isaac_sim/apps",
-                "RESOURCE_NAME": "IsaacSim"
-            },
-            "envFile": "${workspaceFolder}/.vscode/.python.env",
-            "preLaunchTask": "setup_python_env"
+            "justMyCode": false,
         },
+        {
+            "name": "Reach: play",
+            "type": "python",
+            "request": "launch",
+            "args": ["--task", "Isaac-Reach-Franka-v0", "--num_envs", "1", "--checkpoint", 
+            "/home/minjae/Orbit/logs/sb3/Isaac-Reach-Franka-v0/Aug11_16-53-49/model_14643200_steps.zip"
+            ],
+            "program": "/home/minjae/Orbit/source/standalone/workflows/sb3/play.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "Lift: train",
+            "type": "python",
+            "request": "launch",
+            "args": ["--task", "Isaac-Lift-Franka-v0", "--headless", "--cpu", "--num_envs", "1024"],
+            "program": "/home/minjae/Orbit/source/standalone/workflows/sb3/train.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "Lift: play",
+            "type": "python",
+            "request": "launch",
+            "args": ["--task", "Isaac-Lift-Franka-v0", "--num_envs", "1", "--checkpoint", 
+            "/home/minjae/Orbit/logs/sb3/Isaac-Lift-Franka-v0/Aug11_18-05-22/model_13107200_steps.zip"
+            ],
+            "program": "/home/minjae/Orbit/source/standalone/workflows/sb3/play.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        }
     ]
 }
