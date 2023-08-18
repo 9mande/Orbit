@@ -276,6 +276,7 @@ class IsaacEnv(gym.Env):
             reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
             if len(reset_env_ids) > 0:
                 self._reset_idx(reset_env_ids)
+            print(f"w: {self.object.data.root_state_w}, lin:{self.object.data.root_lin_vel_w}, ang: {self.object.data.root_ang_vel_w}") # bong
             # increment the number of steps
             self.episode_length_buf += 1
             # perform the stepping of simulation

@@ -206,6 +206,7 @@ class RigidObject:
         if env_ids is None:
             env_ids = self._ALL_INDICES
         # set into simulation
+        self.objects.initialize()
         self.objects.set_world_poses(root_states[:, 0:3], root_states[:, 3:7], indices=env_ids)
         self.objects.set_velocities(root_states[:, 7:], indices=env_ids)
 
@@ -213,6 +214,7 @@ class RigidObject:
         # note: we need to do this here since tensors are not set into simulation until step.
         # set into internal buffers
         self._data.root_state_w[env_ids] = root_states.clone()
+        
 
     def get_default_root_state(self, env_ids: Optional[Sequence[int]] = None, clone=True) -> torch.Tensor:
         """Returns the default/initial root state of actor.

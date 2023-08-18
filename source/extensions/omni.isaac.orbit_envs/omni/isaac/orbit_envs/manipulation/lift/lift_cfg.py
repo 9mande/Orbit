@@ -34,7 +34,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         scale=(0.8, 0.8, 0.8),
     )
     init_state = RigidObjectCfg.InitialStateCfg(
-        pos=(0.4, 0.0, 0.075), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
+        pos=(0.4, 0.0, 1), rot=(1.0, 0.0, 0.0, 0.0), lin_vel=(0.0, 0.0, 0.0), ang_vel=(0.0, 0.0, 0.0)
     )
     rigid_props = RigidObjectCfg.RigidBodyPropertiesCfg(
         solver_position_iteration_count=16,
@@ -42,7 +42,7 @@ class ManipulationObjectCfg(RigidObjectCfg):
         max_angular_velocity=1000.0,
         max_linear_velocity=1000.0,
         max_depenetration_velocity=5.0,
-        disable_gravity=False,
+        disable_gravity=True,
     )
     physics_material = RigidObjectCfg.PhysicsMaterialCfg(
         static_friction=0.5, dynamic_friction=0.5, restitution=0.0, prim_path="/World/Materials/cubeMaterial"
@@ -122,20 +122,21 @@ class ObservationsCfg:
         # -- joint state
         arm_dof_pos = {"scale": 1.0}
         # arm_dof_pos_scaled = {"scale": 1.0}
-        # arm_dof_vel = {"scale": 0.5, "noise": {"name": "uniform", "min": -0.01, "max": 0.01}}
+        # arm_dof_vel = {"scale": 0.5,}
         tool_dof_pos_scaled = {"scale": 1.0}
         # -- end effector state
         tool_positions = {"scale": 1.0}
         tool_orientations = {"scale": 1.0}
+        tool_vel = {"scale": 1.0,}
         # -- object state
         # object_positions = {"scale": 1.0}
         # object_orientations = {"scale": 1.0}
         object_relative_tool_positions = {"scale": 1.0}
-        # object_relative_tool_orientations = {"scale": 1.0}
+        object_relative_tool_orientations = {"scale": 1.0}
         # -- object desired state
-        object_desired_positions = {"scale": 1.0}
+        # object_desired_positions = {"scale": 1.0}
         # -- previous action
-        arm_actions = {"scale": 1.0}
+        # arm_actions = {"scale": 1.0}
         tool_actions = {"scale": 1.0}
 
     # global observation settings
@@ -150,18 +151,29 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     # -- robot-centric
-    # reaching_object_position_l2 = {"weight": 0.0}
-    # reaching_object_position_exp = {"weight": 2.5, "sigma": 0.25}
-    reaching_object_position_tanh = {"weight": 2.5, "sigma": 0.1}
+    # gripper_goal_distance_l2 = {"weight": 1.0}
+    gripper_object_distance_l2 = {"weight": 2.0, "sigma": 0.1}
+    object_goal_distance_l2 = {"weight": 3.0, "threshold": 0.08}
+    object_goal_reward = {"weight": 0.01, "eps": 0.02, "threshold": 0.08}
+    reaching_object_position_l2 = {"weight": 2.0}
+    # reaching_object_position_exp = {"weight": 1.0, "sigma": 0.25}
+    # reaching_object_position_tanh = {"weight": 1.0, "sigma": 0.1}
+    # reaching_object_orientation = {"weight": 0.25}
     # penalizing_arm_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_tool_dof_velocity_l2 = {"weight": 1e-5}
     # penalizing_robot_dof_acceleration_l2 = {"weight": 1e-7}
+
     # -- action-centric
-    penalizing_arm_action_rate_l2 = {"weight": 1e-2}
+    # penalizing_arm_action_rate_l2 = {"weight": 1e-2}
     # penalizing_tool_action_l2 = {"weight": 1e-2}
+
     # -- object-centric
+    # tracking_object_position_l2 = {"weight": 5.0, "threshold": 0.08}
+
     # tracking_object_position_exp = {"weight": 5.0, "sigma": 0.25, "threshold": 0.08}
-    tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
+    # tracking_object_position_tanh = {"weight": 5.0, "sigma": 0.2, "threshold": 0.08}
+    reaching_object_success = {"weight": 1.0, "threshold": 0.02}
+    # gripping_object_success = {"weight": 10.0, "threshold": 0.02}
     lifting_object_success = {"weight": 3.5, "threshold": 0.08}
 
 
@@ -181,14 +193,14 @@ class ControlCfg:
     # action space
     control_type = "default"  # "default", "inverse_kinematics"
     # decimation: Number of control action updates @ sim dt per policy dt
-    decimation = 2
+    decimation = 1
 
     # configuration loaded when control_type == "inverse_kinematics"
     inverse_kinematics: DifferentialInverseKinematicsCfg = DifferentialInverseKinematicsCfg(
         command_type="pose_rel",
         ik_method="dls",
-        position_command_scale=(0.1, 0.1, 0.1),
-        rotation_command_scale=(0.1, 0.1, 0.1),
+        position_command_scale=(1.0, 1.0, 1.0),
+        rotation_command_scale=(1.0, 1.0, 1.0),
     )
 
 
