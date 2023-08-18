@@ -59,7 +59,7 @@
             "type": "python",
             "request": "launch",
             "args": ["--task", "Isaac-Lift-Franka-v0", "--num_envs", "1", "--checkpoint", 
-            "/home/minjae/Orbit/logs/sb3/Isaac-Lift-Franka-v0/Aug18_12-53-26/model_178790400_steps.zip"
+            "/home/minjae/Orbit/logs/sb3/Isaac-Lift-Franka-v0/Aug11_18-05-22/model_13107200_steps.zip"
             ],
             "program": "/home/minjae/Orbit/source/standalone/workflows/sb3/play.py",
             "console": "integratedTerminal",

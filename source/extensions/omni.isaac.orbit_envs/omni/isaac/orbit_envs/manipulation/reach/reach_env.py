@@ -121,8 +121,8 @@ class ReachEnv(IsaacEnv):
         # controller reset
         if self.cfg.control.control_type == "inverse_kinematics":
             self._ik_controller.reset_idx(env_ids)
-        # elif self.cfg.control.control_type == "default":
-        #     self.robot_actions[env_ids, :7] = 0.0
+        elif self.cfg.control.control_type == "default":
+            self.robot_actions[env_ids, :7] = 0.0
 
     def _step_impl(self, actions: torch.Tensor):
         # pre-step: set actions into buffer
@@ -312,9 +312,6 @@ class ReachEnv(IsaacEnv):
 class ReachObservationManager(ObservationManager):
     """Reward manager for single-arm reaching environment."""
 
-    def arm_dof_pos(self, env: ReachEnv):
-        return env.robot.data.arm_dof_pos
-    
     def arm_dof_pos_normalized(self, env: ReachEnv):
         """DOF positions for the arm normalized to its max and min ranges.""" 
         scaled = scale_transform(
@@ -430,4 +427,4 @@ class ReachRewardManager(RewardManager):
         reward = position_reward
         # print(reward)
         return reward
-
+        

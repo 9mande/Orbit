@@ -391,6 +391,10 @@ class LiftObservationManager(ObservationManager):
         quat_w[quat_w[:, 0] < 0] *= -1
         return quat_w
 
+    def tool_vel(self, env: LiftEnv):
+        """Tool lin/ang velocity."""
+        return env.robot.data.ee_state_w[:, 7:13]
+
     def object_positions(self, env: LiftEnv):
         """Current object position."""
         return env.object.data.root_pos_w - env.envs_positions
@@ -413,6 +417,9 @@ class LiftObservationManager(ObservationManager):
         # make the first element positive
         quat_ee[quat_ee[:, 0] < 0] *= -1
         return quat_ee
+    
+    def target_relative_tool_positions(self, env: LiftEnv):
+        return env.object_des_pose_w[:, 0:3] - env.robot.data.ee_state_w[:, :3]
 
     def object_desired_positions(self, env: LiftEnv):
         """Desired object position."""
@@ -436,11 +443,33 @@ class LiftObservationManager(ObservationManager):
     def tool_actions_bool(self, env: LiftEnv):
         """Last tool actions transformed to a boolean command."""
         return torch.sign(env.actions[:, -1]).unsqueeze(1)
+    
 
 
 class LiftRewardManager(RewardManager):
     """Reward manager for single-arm object lifting environment."""
 
+    def gripper_goal_distance_l2(self, env: LiftEnv):
+        distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object_des_pose_w[:, 0:3], dim=1)
+        return - distance
+
+    def gripper_object_distance_l2(self, env: LiftEnv, sigma: float):
+        ee_distance = torch.norm(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w, dim=1)
+        object_root_pos = env.object.data.root_pos_w.unsqueeze(1)  # (num_envs, 1, 3)
+        tool_sites_distance = torch.norm(env.robot.data.tool_sites_state_w[:, :, :3] - object_root_pos, dim=-1)
+        num_tool_sites = tool_sites_distance.shape[1]
+        average_distance = (ee_distance + torch.sum(tool_sites_distance, dim=1)) / (num_tool_sites + 1)
+        return 1 - torch.tanh(average_distance / sigma)
+
+    def object_goal_distance_l2(self, env: LiftEnv, threshold):
+        distance = torch.norm(env.object.data.root_pos_w - env.object_des_pose_w[:, 0:3], dim=1)
+        return (env.object.data.root_pos_w[:, 2] > threshold) * -distance
+
+    def object_goal_reward(self, env: LiftEnv, eps: float, threshold):
+        distance = torch.norm(env.object.data.root_pos_w - env.object_des_pose_w[:, 0:3], dim=1)
+        return (env.object.data.root_pos_w[:, 2] > threshold) / (distance + eps)
+
+    # -- robot-object
     def reaching_object_position_l2(self, env: LiftEnv):
         """Penalize end-effector tracking position error using L2-kernel."""
         return torch.sum(torch.square(env.robot.data.ee_state_w[:, 0:3] - env.object.data.root_pos_w), dim=1)
@@ -478,7 +507,11 @@ class LiftRewardManager(RewardManager):
 
     def penalizing_tool_action_l2(self, env: LiftEnv):
         """Penalize large values in action commands for the tool."""
+<<<<<<< HEAD
         return -torch.square(env.actions[:, -1])
+=======
+        return - torch.square(env.actions[:, -1])
+>>>>>>> parent of 2ad0949... debug
 
     def tracking_object_position_exp(self, env: LiftEnv, sigma: float, threshold: float):
         """Penalize tracking object position error using exp-kernel."""
@@ -496,4 +529,8 @@ class LiftRewardManager(RewardManager):
 
     def lifting_object_success(self, env: LiftEnv, threshold: float):
         """Sparse reward if object is lifted successfully."""
+<<<<<<< HEAD
         return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)
+=======
+        return torch.where(env.object.data.root_pos_w[:, 2] > threshold, 1.0, 0.0)
+>>>>>>> parent of 2ad0949... debug

@@ -2,11 +2,10 @@
 seed: 42
 
 # epoch * n_steps * nenvs: 500×512*8*8
-# n_timesteps: 16384000
-n_timesteps: 512000000
+n_timesteps: 16384000
 policy: 'MlpPolicy'
 n_steps: 120
-# mini batch size: num_envs * nsteps / nminibatches 1024×512÷2048
+# mini batch size: num_envs * nsteps / nminibatches 2048×512÷2048
 batch_size: 256
 gae_lambda: 0.95
 gamma: 0.99
