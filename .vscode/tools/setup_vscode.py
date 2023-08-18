@@ -77,7 +77,7 @@ def overwrite_default_python_interpreter(orbit_settings: str) -> str:
     Returns:
         The settings string with overwritten default python interpreter.
     """
-    # read executable name
+    # read executble name
     python_exe = sys.executable
     # if python interpreter is from conda, use that. Otherwise, use the template.
     if "conda" not in python_exe:
